@@ -19,3 +19,11 @@ eureka:
     service-url:
       defaultZone: http://localhost:8761/eureka/
 
+springdoc:
+  api-docs:
+    path: /docs
+  packages-to-scan: FileServer.SaveFile.controller
+  show-actuator: true
+  swagger-ui:
+    disable-swagger-default-url: true
+    path: /docs-ui
