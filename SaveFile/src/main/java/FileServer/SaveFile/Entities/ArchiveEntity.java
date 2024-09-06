@@ -23,8 +23,8 @@ public class ArchiveEntity {
     @Column(nullable = false, name = "creation_datetime")
     private LocalDateTime creationDate;
 
-    @Column(nullable = false, unique = true)
-    private String hash; // El hash debe ser único.
+    @Column(nullable = false, unique = true, name = "sha256")
+    private String hashSha256; //
 
     @Column(nullable = false, unique = true, name = "file_path")
     private String path;
