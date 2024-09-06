@@ -1,7 +1,19 @@
 spring:
   application:
     name: SaveFile
-
+  datasource:
+    url: jdbc:postgresql://localhost:5432/fileserverdb
+    username: ema
+    password: 123
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+    defer-datasource-initialization: true
 eureka:
   client:
     service-url:
