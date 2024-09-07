@@ -1,8 +1,15 @@
 package FileServer.SaveFile.Model;
 
+import lombok.*;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 public class Archive {
     private UUID id;
     private String name;
@@ -10,4 +17,5 @@ public class Archive {
     private String hashSha256;
     private String path;
     private String mimeType;
+    private String extension;
 }

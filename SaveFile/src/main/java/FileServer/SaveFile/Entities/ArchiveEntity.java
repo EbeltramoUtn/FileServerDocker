@@ -30,5 +30,7 @@ public class ArchiveEntity {
     private String path;
 
     @Column(nullable = false, name = "file_mime_type")
-    private String mimeType; // Agregado el tipo MIME del archivo
+    private String mimeType;
+    @Column(nullable = false, name = "file_extension")
+    private String extension;
 }
