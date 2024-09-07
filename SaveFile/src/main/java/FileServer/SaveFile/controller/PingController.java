@@ -34,4 +34,5 @@ public class PingController {
     public String pong() {
         return "pong";
     }
+
 }
