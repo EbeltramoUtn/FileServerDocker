@@ -1,3 +1,11 @@
+app:
+  name: SaveFile
+  desc: FileServer save file
+  version: 1.0.0
+  url: http://localhost:8080
+  dev-name: EB
+  dev-email: none@none.com
+
 spring:
   application:
     name: SaveFile
@@ -22,8 +30,10 @@ eureka:
 springdoc:
   api-docs:
     path: /docs
+    enabled: true
   packages-to-scan: FileServer.SaveFile.controller
   show-actuator: true
   swagger-ui:
     disable-swagger-default-url: true
     path: /docs-ui
+    enabled: true
