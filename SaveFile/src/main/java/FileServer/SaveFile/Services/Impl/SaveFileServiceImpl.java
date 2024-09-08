@@ -1,12 +1,14 @@
 package FileServer.SaveFile.Services.Impl;
 
 import FileServer.SaveFile.Exception.CustomException;
+import FileServer.SaveFile.Messaging.Producer.ArchiveProducer;
 import FileServer.SaveFile.Model.Archive;
 import FileServer.SaveFile.Services.ArchiveService;
 import FileServer.SaveFile.Services.HashService;
 import FileServer.SaveFile.Services.SaveFileService;
 import FileServer.SaveFile.dtos.FileDto;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,18 +20,22 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
 public class SaveFileServiceImpl implements SaveFileService {
     private final HashService hashService;
     private final ArchiveService archiveService;
-    private final String PATH_FOLDER = "./fileUpload/";
 
+    private final ArchiveProducer archiveProducer;
+    @Value("${app.file-storage-path}")
+    private String pathFolder;
     @Autowired
-    public SaveFileServiceImpl(HashService hashService, ArchiveService archiveService) {
+    public SaveFileServiceImpl(HashService hashService, ArchiveService archiveService, ArchiveProducer archiveProducer) {
         this.hashService = hashService;
         this.archiveService = archiveService;
+        this.archiveProducer = archiveProducer;
     }
     @Override
     public String SaveFile(FileDto fileDto) {
@@ -46,22 +52,26 @@ public class SaveFileServiceImpl implements SaveFileService {
             }
         }
         Archive archive;
-        archive = archiveService.GetFileByHash(fileDto.getHashSha256());
+        archive = archiveService.getFileByHash(
+                Objects.requireNonNullElse(fileDto.getHashSha256(), hashService.getSha256String(fileDto.getFile()))
+        );
         // If the archive exist we don't need created
         if(archive == null){
+            archive = new Archive();
             generateArchive(fileDto,archive);
-            //TODO event RABBITMQ
+            archiveProducer.send(archive);
         }
         return archive.getId().toString();
     }
     private void generateArchive(FileDto fileDto,Archive archive){
-        archive = new Archive();
+
         archive.setId(UUID.randomUUID());
         archive.setName(fileDto.getFile().getOriginalFilename());
         archive.setExtension(archive.getName().substring(archive.getName().lastIndexOf(".") + 1));
         archive.setHashSha256(hashService.getSha256String(fileDto.getFile()));
 
-        String filePath = PATH_FOLDER + archive.getName() + "."+archive.getExtension();
+        String filePath = pathFolder + archive.getId().toString() + "."+archive.getExtension();
+        archive.setPath(filePath);
         File convertFile = new File(filePath);
         convertFile.getParentFile().mkdirs();
         archive.setCreationDate(LocalDateTime.now());
