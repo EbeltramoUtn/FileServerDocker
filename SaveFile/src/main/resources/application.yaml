@@ -3,8 +3,9 @@ app:
   desc: FileServer save file
   version: 1.0.0
   url: http://localhost:8080
-  dev-name: EB
-  dev-email: none@none.com
+  dev-name: Ema Beltramo
+  dev-email: beltramoemanuel@gmail.com
+  file-storage-path: ${FILE_STORAGE_PATH:/shared/files/}
 
 spring:
   application:
@@ -22,6 +23,11 @@ spring:
       hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
     show-sql: true
     defer-datasource-initialization: true
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
 eureka:
   client:
     service-url:
