@@ -1,0 +1,48 @@
+app:
+  name: GetFile
+  desc: FileServer return file
+  version: 1.0.0
+  url: http://localhost:8080
+  dev-name: Ema Beltramo
+  dev-email: beltramoemanuel@gmail.com
+  file-storage-path: ${FILE_STORAGE_PATH:/shared/files/}
+
+spring:
+  application:
+    name: GetFile
+  datasource:
+    url: jdbc:postgresql://localhost:5432/${POSTGRES_DB}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+    defer-datasource-initialization: true
+  rabbitmq:
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_PORT}
+    username: ${RABBITMQ_USER}
+    password: ${RABBITMQ_PASSWORD}
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL}
+
+springdoc:
+  api-docs:
+    path: /docs
+    enabled: true
+  packages-to-scan: FileServer.GetFile.controller
+  show-actuator: true
+  swagger-ui:
+    disable-swagger-default-url: true
+    path: /docs-ui
+    enabled: true
+
+logging.level.org.hibernate.SQL: DEBUG
+logging.level.org.hibernate.type.descriptor.sql.BasicBinder: TRACE
