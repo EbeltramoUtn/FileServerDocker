@@ -11,9 +11,9 @@ spring:
   application:
     name: SaveFile
   datasource:
-    url: jdbc:postgresql://localhost:5432/fileserverdb
-    username: ema
-    password: 123
+    url: jdbc:postgresql://localhost:5432/${POSTGRES_DB}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -24,14 +24,14 @@ spring:
     show-sql: true
     defer-datasource-initialization: true
   rabbitmq:
-    host: localhost
-    port: 5672
-    username: guest
-    password: guest
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_PORT}
+    username: ${RABBITMQ_USER}
+    password: ${RABBITMQ_PASSWORD}
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: ${EUREKA_SERVER_URL}
 
 springdoc:
   api-docs:
@@ -43,3 +43,6 @@ springdoc:
     disable-swagger-default-url: true
     path: /docs-ui
     enabled: true
+
+logging.level.org.hibernate.SQL: DEBUG
+logging.level.org.hibernate.type.descriptor.sql.BasicBinder: TRACE
