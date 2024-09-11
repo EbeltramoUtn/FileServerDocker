@@ -16,25 +16,29 @@ public class ArchiveConsumer {
 
     private final ArchiveService archiveService;
     private final RabbitMQConfig rabbitMQConfig;
+
     /**
-     * Constructor that injects the {@link ArchiveService} to handle archive-related logic.
+     * Constructor that injects the {@link ArchiveService} and {@link RabbitMQConfig}
+     * to handle archive-related logic and configuration.
      *
      * @param archiveService the service responsible for saving the archive to the database
+     * @param rabbitMQConfig the configuration for RabbitMQ, including the queue name
      */
     @Autowired
-    public ArchiveConsumer(ArchiveService archiveService,RabbitMQConfig config) {
+    public ArchiveConsumer(ArchiveService archiveService, RabbitMQConfig rabbitMQConfig) {
         this.archiveService = archiveService;
-        this.rabbitMQConfig = config;
+        this.rabbitMQConfig = rabbitMQConfig;
     }
 
     /**
-     * This method is a RabbitMQ listener that processes messages from the configured durable queue.
-     * It uses manual acknowledgment mode, allowing the consumer to manually acknowledge or reject a message.
+     * RabbitMQ listener that processes messages from the configured durable queue.
+     * This method uses manual acknowledgment, meaning the consumer will manually confirm
+     * if the message was processed successfully or not.
      *
-     * @param archive      the {@link Archive} object received from the queue
-     * @param deliveryTag  the delivery tag of the RabbitMQ message, used for acknowledging or rejecting the message
-     * @param channel      the RabbitMQ channel, used to perform manual acknowledgment or rejection of messages
-     * @throws Exception if there is an issue processing the message or interacting with the RabbitMQ channel
+     * @param archive     the {@link Archive} object received from the queue
+     * @param deliveryTag the delivery tag of the message, used to acknowledge or reject it
+     * @param channel     the RabbitMQ channel, used for manual acknowledgment or rejection
+     * @throws Exception if there is an issue processing the message or interacting with RabbitMQ
      */
     @RabbitListener(queues = "#{rabbitMQConfig.DURABLE_QUEUE}", ackMode = "MANUAL")
     public void receive(
@@ -47,16 +51,16 @@ public class ArchiveConsumer {
 
         try {
             if (result != null) {
-                // Acknowledge the message as successfully processed
+                // If the archive is successfully saved, acknowledge the message
                 channel.basicAck(deliveryTag, false);
             } else {
-                // Reject and requeue the message if processing failed
+                // If saving fails, reject the message and requeue it
                 channel.basicNack(deliveryTag, false, true);
             }
         } catch (Exception e) {
-            // Handle any exceptions and requeue the message
+            // If an exception occurs, reject the message and requeue it
             channel.basicNack(deliveryTag, false, true);
-            throw e; // Optionally rethrow the exception for further handling
+            throw e; // Rethrow the exception for further handling
         }
     }
 }

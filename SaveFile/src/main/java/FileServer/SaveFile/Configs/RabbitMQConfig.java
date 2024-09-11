@@ -19,15 +19,16 @@ public class RabbitMQConfig {
     // Name of the durable queue
     public String DURABLE_QUEUE;
 
+    // Constructor to initialize the durable queue name with the container name
     public RabbitMQConfig() {
         this.DURABLE_QUEUE = "durable_queue_" + getContainerName();
     }
 
     /**
-     * This method defines the Fanout Exchange bean.
-     * A Fanout Exchange routes messages to all queues bound to it, without considering any routing key.
+     * Defines a bean for the Fanout Exchange.
+     * A Fanout Exchange broadcasts messages to all bound queues, regardless of any routing key.
      *
-     * @return FanoutExchange object configured with the exchange name.
+     * @return A FanoutExchange object configured with a specific exchange name.
      */
     @Bean
     public FanoutExchange fanoutExchange() {
@@ -35,53 +36,54 @@ public class RabbitMQConfig {
     }
 
     /**
-     * This method defines the durable queue bean.
-     * A durable queue ensures that the queue will survive a broker restart.
+     * Defines a bean for a durable queue.
+     * A durable queue will persist even after the broker restarts, ensuring message delivery.
      *
-     * @return Queue object representing a durable queue.
+     * @return A Queue object that represents a durable queue.
      */
     @Bean
     public Queue durableQueue() {
-
         return new Queue(DURABLE_QUEUE, true); // true indicates the queue is durable
     }
 
     /**
-     * This method binds the durable queue to the Fanout Exchange.
-     * Any message sent to the Fanout Exchange will be delivered to the bound queue.
+     * Creates a binding between the Fanout Exchange and the durable queue.
+     * This ensures that any message sent to the Fanout Exchange is routed to the durable queue.
      *
      * @param fanoutExchange The Fanout Exchange bean.
-     * @param durableQueue   The Queue bean to be bound.
-     * @return Binding object representing the relationship between the exchange and the queue.
+     * @param durableQueue   The durable Queue bean.
+     * @return A Binding object representing the link between the exchange and the queue.
      */
     @Bean
     public Binding binding(FanoutExchange fanoutExchange, Queue durableQueue) {
         return BindingBuilder.bind(durableQueue).to(fanoutExchange);
     }
+
     /**
-     * This method provides a Jackson2JsonMessageConverter that will be used to convert
-     * messages to and from JSON format.
+     * Provides a JSON message converter to transform messages to and from JSON format.
+     * This is essential for exchanging structured data between services.
      *
-     * @return Jackson2JsonMessageConverter for RabbitMQ message conversion
+     * @return A Jackson2JsonMessageConverter used for message serialization and deserialization.
      */
     @Bean
     public MessageConverter jsonMessageConverter() {
         return new Jackson2JsonMessageConverter();
     }
+
     /**
-     * This method reads the container name from the /etc/hostname file.
-     * The hostname inside Docker containers usually corresponds to the container name.
+     * Retrieves the container name by reading the /etc/hostname file.
+     * In Docker environments, the hostname usually corresponds to the container name.
+     * If an error occurs during file reading, a default name is returned.
      *
-     * @return The container name as a string.
+     * @return The container name as a String.
      */
     private String getContainerName() {
-        String containerName = "defaultContainer"; // Default value in case of error
+        String containerName = "defaultContainer"; // Default value in case of an error
         try {
             containerName = new String(Files.readAllBytes(Paths.get("/etc/hostname"))).trim();
         } catch (IOException e) {
-            e.printStackTrace(); // Log the error if there's an issue reading the file
+            e.printStackTrace(); // Log the error if reading the file fails
         }
         return containerName;
     }
 }
-
