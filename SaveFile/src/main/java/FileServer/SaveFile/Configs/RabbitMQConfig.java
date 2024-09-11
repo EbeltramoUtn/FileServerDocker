@@ -6,6 +6,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 @Configuration
 public class RabbitMQConfig {
 
@@ -13,7 +17,11 @@ public class RabbitMQConfig {
     public static final String FANOUT_EXCHANGE = "file_fanout_exchange";
 
     // Name of the durable queue
-    public static final String DURABLE_QUEUE = "durable_queue";
+    public String DURABLE_QUEUE;
+
+    public RabbitMQConfig() {
+        this.DURABLE_QUEUE = "durable_queue_" + getContainerName();
+    }
 
     /**
      * This method defines the Fanout Exchange bean.
@@ -34,6 +42,7 @@ public class RabbitMQConfig {
      */
     @Bean
     public Queue durableQueue() {
+
         return new Queue(DURABLE_QUEUE, true); // true indicates the queue is durable
     }
 
@@ -58,6 +67,21 @@ public class RabbitMQConfig {
     @Bean
     public MessageConverter jsonMessageConverter() {
         return new Jackson2JsonMessageConverter();
+    }
+    /**
+     * This method reads the container name from the /etc/hostname file.
+     * The hostname inside Docker containers usually corresponds to the container name.
+     *
+     * @return The container name as a string.
+     */
+    private String getContainerName() {
+        String containerName = "defaultContainer"; // Default value in case of error
+        try {
+            containerName = new String(Files.readAllBytes(Paths.get("/etc/hostname"))).trim();
+        } catch (IOException e) {
+            e.printStackTrace(); // Log the error if there's an issue reading the file
+        }
+        return containerName;
     }
 }
 

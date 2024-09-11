@@ -15,15 +15,16 @@ import org.springframework.amqp.support.AmqpHeaders;
 public class ArchiveConsumer {
 
     private final ArchiveService archiveService;
-
+    private final RabbitMQConfig rabbitMQConfig;
     /**
      * Constructor that injects the {@link ArchiveService} to handle archive-related logic.
      *
      * @param archiveService the service responsible for saving the archive to the database
      */
     @Autowired
-    public ArchiveConsumer(ArchiveService archiveService) {
+    public ArchiveConsumer(ArchiveService archiveService,RabbitMQConfig config) {
         this.archiveService = archiveService;
+        this.rabbitMQConfig = config;
     }
 
     /**
@@ -35,7 +36,7 @@ public class ArchiveConsumer {
      * @param channel      the RabbitMQ channel, used to perform manual acknowledgment or rejection of messages
      * @throws Exception if there is an issue processing the message or interacting with the RabbitMQ channel
      */
-    @RabbitListener(queues = RabbitMQConfig.DURABLE_QUEUE, ackMode = "MANUAL")
+    @RabbitListener(queues = "#{rabbitMQConfig.DURABLE_QUEUE}", ackMode = "MANUAL")
     public void receive(
             @Payload Archive archive,
             @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag,
