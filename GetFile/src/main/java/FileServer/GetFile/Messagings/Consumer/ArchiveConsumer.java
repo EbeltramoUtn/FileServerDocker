@@ -16,15 +16,18 @@ public class ArchiveConsumer {
 
     private final ArchiveService archiveService;
     private final RabbitMQConfig rabbitMQConfig;
+
     /**
-     * Constructor that injects the {@link ArchiveService} to handle archive-related logic.
+     * Constructor that injects the {@link ArchiveService} to handle archive-related logic,
+     * and the {@link RabbitMQConfig} to configure RabbitMQ settings.
      *
      * @param archiveService the service responsible for saving the archive to the database
+     * @param rabbitMQConfig the configuration for RabbitMQ, including the queue name
      */
     @Autowired
-    public ArchiveConsumer(ArchiveService archiveService,RabbitMQConfig config) {
+    public ArchiveConsumer(ArchiveService archiveService, RabbitMQConfig rabbitMQConfig) {
         this.archiveService = archiveService;
-        this.rabbitMQConfig = config;
+        this.rabbitMQConfig = rabbitMQConfig;
     }
 
     /**
@@ -41,6 +44,7 @@ public class ArchiveConsumer {
             @Payload Archive archive,
             @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag,
             @Header(AmqpHeaders.CHANNEL) Channel channel) throws Exception {
+
         // Attempt to save the archive in the database
         Archive result = archiveService.saveFile(archive);
 

@@ -19,6 +19,12 @@ public class ArchiveServiceImpl implements ArchiveService {
     private final ArchiveRepositoryJpa archiveRepositoryJpa;
     private final ModelMapper modelMapper;
 
+    /**
+     * Constructor to inject dependencies for repository and model mapper.
+     *
+     * @param archiveRepositoryJpa the repository to manage archive entities
+     * @param modelMapper the ModelMapper used for object mapping between Archive and ArchiveEntity
+     */
     @Autowired
     public ArchiveServiceImpl(ArchiveRepositoryJpa archiveRepositoryJpa, ModelMapper modelMapper) {
         this.archiveRepositoryJpa = archiveRepositoryJpa;
@@ -48,7 +54,7 @@ public class ArchiveServiceImpl implements ArchiveService {
             // Map the saved ArchiveEntity back to Archive and return it
             return modelMapper.map(archiveEntity, Archive.class);
         } catch (Exception e) {
-            // Handle exceptions properly, could be improved with better error handling/logging
+            // Handle exceptions, could be improved with better error handling/logging
             System.out.println(e.getMessage());
             return null;
         }
@@ -72,13 +78,23 @@ public class ArchiveServiceImpl implements ArchiveService {
 
         return result;
     }
+
+    /**
+     * Retrieves an archive from the database based on its UUID.
+     *
+     * @param sUuid the UUID of the file to retrieve.
+     * @return the corresponding Archive object if found, otherwise null.
+     */
     @Override
-    public Archive getFileById(String sUuid){
+    public Archive getFileById(String sUuid) {
         Archive result = null;
         Optional<ArchiveEntity> archiveEntity = archiveRepositoryJpa.findById(UUID.fromString(sUuid));
+
+        // If the archive is found, map it to Archive object
         if (archiveEntity.isPresent()) {
-            result= modelMapper.map(archiveEntity.get(), Archive.class);
+            result = modelMapper.map(archiveEntity.get(), Archive.class);
         }
+
         return result;
     }
 }
