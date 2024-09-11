@@ -46,7 +46,7 @@ public class GetFileServiceImpl implements GetFileService {
         } else {
             throw new CustomException("File not found", HttpStatus.NOT_FOUND);
         }
-        if(result.getHashMd5().equals(archive.getHashSha256()))
+        if(!result.getHashMd5().equals(archive.getHashSha256()))
             throw new CustomException("Integrity file conflict", HttpStatus.CONFLICT);
         return result;
     }
