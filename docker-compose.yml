@@ -9,9 +9,23 @@ services:
     ports:
       - 5672:5672  # Puerto de RabbitMQ para la mensajería
       - 15672:15672 # Puerto de RabbitMQ Management UI
+      - 15692:15692
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
+  rabbitmq-exporter:
+    image: kbudde/rabbitmq-exporter
+    container_name: rabbitmq-exporter
+    environment:
+      RABBIT_URL: http://rabbitmq:15672  # URL de RabbitMQ
+      RABBIT_USER: guest  # Usuario de RabbitMQ
+      RABBIT_PASSWORD: guest  # Contraseña de RabbitMQ
+    ports:
+      - 9419:9419  # Puerto para las métricas de RabbitMQ
+    depends_on:
+      - rabbitmq
+    networks:
+      - mynetwork
   eureka:
     container_name: eureka-server-image
     image: eureka:1.0
@@ -41,6 +55,8 @@ services:
       - shared_files:/mnt/shared/files
     networks:
       - mynetwork
+    expose:
+      - 8080
   FileServerGet:
     container_name: get-service-app
     image: file_server-get:1.0
@@ -62,6 +78,8 @@ services:
       - shared_files:/mnt/shared/files
     networks:
       - mynetwork
+    expose:
+      - 8080
   api-gateway:
     container_name: api-gateway-app
     image: api-gateway:1.0
@@ -76,10 +94,34 @@ services:
       - 8080:8080  # Exponer solo el API Gateway al host
     networks:
       - mynetwork
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - 9090:9090  # Exponer Prometheus
+    networks:
+      - mynetwork
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - 3000:3000  # Exponer Grafana
+    networks:
+      - mynetwork
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin  # Cambia la contraseña por seguridad
+    volumes:
+      - grafana_data:/var/lib/grafana  # Añadir volumen persistente para Grafana
 
 networks:
   mynetwork:
     driver: bridge
 volumes:
   shared_files:
+    driver: local
+  grafana_data:  # Volumen persistente para Grafana
     driver: local
