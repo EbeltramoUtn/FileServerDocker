@@ -47,7 +47,7 @@ public class FileController {
                     )
             )
     })
-    @GetMapping("/{uuid}")
+    @GetMapping("/getfile/{uuid}")
     public ResponseEntity<FileDto> getFileDetails(@PathVariable String uuid) {
         FileDto fileDto = getFileService.getFileById(uuid);
         return new ResponseEntity<>(fileDto, HttpStatus.OK);

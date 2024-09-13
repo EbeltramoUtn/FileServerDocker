@@ -52,7 +52,7 @@ public class FileController {
                     content = @Content(schema = @Schema(implementation = ErrorApi.class))
             )
     })
-    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/savefile/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> SaveFile(@RequestPart("file") MultipartFile file,
                                            @RequestPart(value = "hashMd5", required = false) String hashMd5,
                                            @RequestPart(value = "hashSha256", required = false) String hashSha256) {
