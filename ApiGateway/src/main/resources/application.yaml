@@ -35,6 +35,11 @@ eureka:
   client:
     serviceUrl:
       defaultZone: ${EUREKA_SERVER_URL}
+  instance:
+    metadataMap:
+      prometheus.scrape: "true"
+      prometheus.path: "/actuator/prometheus"
+      prometheus.port: "8080"  # Cambia según el puerto donde expongas las métricas
 resilience4j:
   circuitbreaker:
     configs:
@@ -48,3 +53,11 @@ resilience4j:
         baseConfig: default
       getFileCircuitBreaker:
         baseConfig: default
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,prometheus"  # Exponer los endpoints de health y prometheus
+  endpoint:
+    health:
+      show-details: always  # Mostrar detalles completos en el endpoint de salud
