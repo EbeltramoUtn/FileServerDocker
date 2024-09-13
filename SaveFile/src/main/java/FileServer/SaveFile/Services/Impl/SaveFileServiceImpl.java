@@ -7,6 +7,7 @@ import FileServer.SaveFile.Services.ArchiveService;
 import FileServer.SaveFile.Services.HashService;
 import FileServer.SaveFile.Services.SaveFileService;
 import FileServer.SaveFile.dtos.FileDto;
+import org.apache.tika.Tika;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -109,7 +110,7 @@ public class SaveFileServiceImpl implements SaveFileService {
 
         // Set the MIME type of the file
         try {
-            archive.setMimeType(Files.probeContentType(Paths.get(filePath)));
+            archive.setMimeType(detectMimeType(convertFile));
         } catch (Exception e) {
             throw new CustomException("Error while saving the file", HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -135,5 +136,14 @@ public class SaveFileServiceImpl implements SaveFileService {
      */
     private Boolean checkHashSha256(String hashSha256, MultipartFile file) {
         return hashService.checkSha256Hash(file, hashSha256);
+    }
+
+    private String detectMimeType(File file) {
+        Tika tika = new Tika();
+        try {
+            return tika.detect(file);
+        } catch (IOException e) {
+            throw new CustomException("Error while detecting MIME type", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }
