@@ -35,6 +35,7 @@ public class ArchiveProducer {
      */
     public void send(Archive archive) {
         // Send the archive object to the Fanout Exchange
+        System.out.println("Sending archive " + archive);
         rabbitTemplate.convertAndSend(RabbitMQConfig.FANOUT_EXCHANGE, "", archive);
     }
 }

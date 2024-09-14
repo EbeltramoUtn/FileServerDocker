@@ -57,6 +57,7 @@ public class GetFileServiceImpl implements GetFileService {
                 result.setMimeType(Files.probeContentType(filePath));
                 result.setFileName(filePath.getFileName().toString());
                 result.setHashMd5(hashService.getSha256String(result.getBytes()));
+                result.setUuid(archive.getId());
             } catch (Exception e) {
                 // Throw a custom exception if an error occurs while reading the file
                 throw new CustomException("An error occurred while retrieving the file", HttpStatus.INTERNAL_SERVER_ERROR);
