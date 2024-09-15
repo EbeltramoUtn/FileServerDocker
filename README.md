@@ -184,9 +184,7 @@ Cada microservicio `GetFile` y `SaveFile` contiene su propia instancia de **Post
    cd ApiGateway && mvn package -DskipTests
    cd ../Eureka && mvn package -DskipTests
    cd ../SaveFile && mvn package -DskipTests
-   cd ../
-
-GetFile && mvn package -DskipTests
+   cd ../GetFile && mvn package -DskipTests
    cd ../Verifier && mvn package -DskipTests
    ```
 
