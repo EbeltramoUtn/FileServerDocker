@@ -1,0 +1,146 @@
+version: '3.8'
+services:
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: rabbitmq
+    networks:
+      - mynetwork
+    hostname: rabbitmq
+    ports:
+      - 5672:5672  # Puerto de RabbitMQ para la mensajería
+      - 15672:15672 # Puerto de RabbitMQ Management UI
+      - 15692:15692
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+  rabbitmq-exporter:
+    image: kbudde/rabbitmq-exporter
+    container_name: rabbitmq-exporter
+    environment:
+      RABBIT_URL: http://rabbitmq:15672  # URL de RabbitMQ
+      RABBIT_USER: guest  # Usuario de RabbitMQ
+      RABBIT_PASSWORD: guest  # Contraseña de RabbitMQ
+    ports:
+      - 9419:9419  # Puerto para las métricas de RabbitMQ
+    depends_on:
+      - rabbitmq
+    networks:
+      - mynetwork
+  eureka:
+    container_name: eureka-server-image
+    image: eureka:1.0
+    build: ../FileServerDocker/EUREKA/
+    ports:
+      - 8761:8761
+    networks:
+      - mynetwork
+  FileServerSave:
+    image: file_server-save:1.0
+    build: ../FileServerDocker/SaveFile/
+    depends_on:
+      - eureka
+      - rabbitmq
+    environment:
+      POSTGRES_DB: archivedb
+      POSTGRES_USER: ema
+      POSTGRES_PASSWORD: 123
+      FILE_STORAGE_PATH: /mnt/shared/files/
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: guest
+      RABBITMQ_PASSWORD: guest
+      EUREKA_SERVER_URL: http://eureka-server-image:8761/eureka # URL de Eureka
+    volumes:
+      - shared_files:/mnt/shared/files
+    networks:
+      - mynetwork
+    expose:
+      - 8080
+  FileServerGet:
+    image: file_server-get:1.0
+    build: ../FileServerDocker/GetFile/
+    depends_on:
+      - eureka
+      - rabbitmq
+    environment:
+      POSTGRES_DB: archivedb
+      POSTGRES_USER: ema
+      POSTGRES_PASSWORD: 123
+      FILE_STORAGE_PATH: /mnt/shared/files/
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: guest
+      RABBITMQ_PASSWORD: guest
+      EUREKA_SERVER_URL: http://eureka-server-image:8761/eureka # URL de Eureka
+    volumes:
+      - shared_files:/mnt/shared/files
+    networks:
+      - mynetwork
+    expose:
+      - 8080
+  FileServerVerifi:
+    container_name: verifi-service-app
+    image: verifi_server-image:1.0
+    build: ../FileServerDocker/Verifier/
+    entrypoint: sh -c "sleep 30 && java -jar /verifier-app.jar"
+    depends_on:
+      - FileServerGet
+      - FileServerSave
+      - rabbitmq
+      - eureka
+    environment:
+      FILE_STORAGE_PATH: /mnt/shared/files/
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: guest
+      RABBITMQ_PASSWORD: guest
+      EUREKA_SERVER_URL: http://eureka-server-image:8761/eureka # URL de Eureka
+    volumes:
+      - shared_files:/mnt/shared/files
+    networks:
+      - mynetwork
+  api-gateway:
+    container_name: api-gateway-app
+    image: api-gateway:1.0
+    build: ../FileServerDocker/ApiGateway/
+    depends_on:
+      - eureka
+      - FileServerSave
+      - FileServerGet
+    environment:
+      EUREKA_SERVER_URL: http://eureka-server-image:8761/eureka # URL de Eureka
+    ports:
+      - 8080:8080  # Exponer solo el API Gateway al host
+    networks:
+      - mynetwork
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - 9090:9090  # Exponer Prometheus
+    networks:
+      - mynetwork
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - 3000:3000  # Exponer Grafana
+    networks:
+      - mynetwork
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin  # Cambia la contraseña por seguridad
+    volumes:
+      - grafana_data:/var/lib/grafana  # Añadir volumen persistente para Grafana
+
+networks:
+  mynetwork:
+    driver: bridge
+volumes:
+  shared_files:
+    driver: local
+  grafana_data:  # Volumen persistente para Grafana
+    driver: local

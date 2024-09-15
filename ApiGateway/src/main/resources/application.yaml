@@ -1,0 +1,63 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  main:
+    web-application-type: reactive
+  cloud:
+    gateway:
+      routes:
+        - id: save-file-service
+          uri: lb://savefile  # Nombre del servicio registrado en Eureka
+          predicates:
+            - Path=/savefile/**  # Ruta que ser  manejada por SaveFile
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: saveFileCircuitBreaker
+                fallbackUri: forward:/fallback/savefile
+        - id: get-file-service
+          uri: lb://getfile  # Nombre del servicio registrado en Eureka
+          predicates:
+            - Path=/getfile/**  # Ruta que ser  manejada por GetFile
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: getFileCircuitBreaker
+                fallbackUri: forward:/fallback/getfile
+    discovery:
+      locator:
+        enabled: true
+        lower-case-service-id: true  # Convierte los IDs de servicio a minusculas
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_SERVER_URL}
+  instance:
+    metadataMap:
+      prometheus.scrape: "true"
+      prometheus.path: "/actuator/prometheus"
+      prometheus.port: "8080"  # Cambia según el puerto donde expongas las métricas
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowSize: 10  # N�mero de llamadas en la ventana deslizante
+        failureRateThreshold: 50  # Umbral de tasa de fallos en porcentaje
+        waitDurationInOpenState: 10000  # Tiempo en ms para esperar antes de intentar de nuevo
+        permittedNumberOfCallsInHalfOpenState: 3  # N�mero de llamadas permitidas en estado semiabierto
+    instances:
+      saveFileCircuitBreaker:
+        baseConfig: default
+      getFileCircuitBreaker:
+        baseConfig: default
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,prometheus"  # Exponer los endpoints de health y prometheus
+  endpoint:
+    health:
+      show-details: always  # Mostrar detalles completos en el endpoint de salud

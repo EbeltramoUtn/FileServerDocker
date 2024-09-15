@@ -1,0 +1,3 @@
+https://grafana.com/grafana/dashboards/20856-rabbitmq-overview-staging-dev-intergration/
+https://grafana.com/grafana/dashboards/4279-rabbitmq-monitoring/
+https://grafana.com/grafana/dashboards/14430-spring-boot-statistics-endpoint-metrics/

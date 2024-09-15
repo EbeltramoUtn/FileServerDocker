@@ -1,0 +1,15 @@
+app:
+  file-storage-path: ${FILE_STORAGE_PATH:/shared/files/}
+
+spring:
+  application:
+    name: verifile
+  rabbitmq:
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_PORT}
+    username: ${RABBITMQ_USER}
+    password: ${RABBITMQ_PASSWORD}
+
+  cloud:
+    compatibility-verifier:
+      enabled: false

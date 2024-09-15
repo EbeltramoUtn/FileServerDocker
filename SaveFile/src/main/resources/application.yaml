@@ -1,0 +1,62 @@
+app:
+  name: SaveFile
+  desc: FileServer save file
+  version: 1.0.0
+  url: http://localhost:8080
+  dev-name: Ema Beltramo
+  dev-email: beltramoemanuel@gmail.com
+  file-storage-path: ${FILE_STORAGE_PATH:/shared/files/}
+
+spring:
+  application:
+    name: savefile
+  datasource:
+    url: jdbc:postgresql://localhost:5432/${POSTGRES_DB}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+    defer-datasource-initialization: true
+  rabbitmq:
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_PORT}
+    username: ${RABBITMQ_USER}
+    password: ${RABBITMQ_PASSWORD}
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL}
+  instance:
+    metadataMap:
+      prometheus.scrape: "true"
+      prometheus.path: "/actuator/prometheus"
+      prometheus.port: "8080"  # Cambia según el puerto donde expongas las métricas
+
+springdoc:
+  api-docs:
+    path: /docs
+    enabled: true
+  packages-to-scan: FileServer.SaveFile.controller
+  show-actuator: true
+  swagger-ui:
+    disable-swagger-default-url: true
+    path: /docs-ui
+    enabled: true
+
+logging.level.org.hibernate.SQL: DEBUG
+logging.level.org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,prometheus"  # Exponer los endpoints de health y prometheus
+  endpoint:
+    health:
+      show-details: always  # Mostrar detalles completos en el endpoint de salud
