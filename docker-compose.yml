@@ -35,7 +35,6 @@ services:
     networks:
       - mynetwork
   FileServerSave:
-    container_name: save-service-app
     image: file_server-save:1.0
     build: ../FileServerDocker/SaveFile/
     depends_on:
@@ -58,7 +57,6 @@ services:
     expose:
       - 8080
   FileServerGet:
-    container_name: get-service-app
     image: file_server-get:1.0
     build: ../FileServerDocker/GetFile/
     depends_on:
@@ -80,6 +78,27 @@ services:
       - mynetwork
     expose:
       - 8080
+  FileServerVerifi:
+    container_name: verifi-service-app
+    image: verifi_server-image:1.0
+    build: ../FileServerDocker/Verifier/
+    entrypoint: sh -c "sleep 30 && java -jar /verifier-app.jar"
+    depends_on:
+      - FileServerGet
+      - FileServerSave
+      - rabbitmq
+      - eureka
+    environment:
+      FILE_STORAGE_PATH: /mnt/shared/files/
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: guest
+      RABBITMQ_PASSWORD: guest
+      EUREKA_SERVER_URL: http://eureka-server-image:8761/eureka # URL de Eureka
+    volumes:
+      - shared_files:/mnt/shared/files
+    networks:
+      - mynetwork
   api-gateway:
     container_name: api-gateway-app
     image: api-gateway:1.0
