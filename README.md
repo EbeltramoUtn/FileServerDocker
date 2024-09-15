@@ -102,23 +102,7 @@ Cada microservicio `GetFile` y `SaveFile` contiene su propia instancia de **Post
 
 ## Endpoints de los Microservicios
 
-### 1. **ApiGateway**
-
-- **GET /files/{filename}**
-  - Descripción: Redirige la solicitud al microservicio `GetFile` para obtener un archivo.
-  - Respuesta:
-    - **200 OK**: Devuelve el archivo solicitado.
-    - **404 Not Found**: Si el archivo no existe.
-
-- **POST /files/upload**
-  - Descripción: Redirige la solicitud al microservicio `SaveFile` para subir un archivo.
-  - Respuesta:
-    - **200 OK**: El archivo se ha subido correctamente y se devuelve el UUID del archivo.
-    - **400 Bad Request**: Si el archivo no es válido.
-
----
-
-### 2. **GetFile Microservice**
+### 1. **GetFile Microservice**
 
 - **GET /getfile/{uuid}**
   - Descripción: Recupera los detalles del archivo utilizando su UUID.
@@ -140,10 +124,12 @@ Cada microservicio `GetFile` y `SaveFile` contiene su propia instancia de **Post
   "bytes": "SGVsbG8gd29ybGQ="  // Base64 encoded content
 }
 ```
-
+- **GET /getfile/ping**
+  - Descripción: Verifica la conectividad y el estado del microservicio.
+  - Respuesta: `pong`
 ---
 
-### 3. **SaveFile Microservice**
+### 2. **SaveFile Microservice**
 
 - **POST /savefile/upload**
   - Descripción: Sube un archivo y, opcionalmente, verifica su integridad mediante hashes MD5 o SHA-256.
@@ -160,7 +146,9 @@ Cada microservicio `GetFile` y `SaveFile` contiene su propia instancia de **Post
 ```json
 "f38b7319-6bd1-482e-a7b4-c531ebc0fc43"
 ```
-
+- **GET /savefile/ping**
+  - Descripción: Verifica la conectividad y el estado del microservicio.
+  - Respuesta: `pong`
 ---
 
 
