@@ -1,0 +1,68 @@
+@startuml
+left to right direction
+
+skinparam rectangle {
+  BackgroundColor<<Microservice>> YellowGreen
+  BackgroundColor<<Database>> LightSkyBlue
+  BackgroundColor<<FanOut>> LightCoral
+  BackgroundColor<<Monitor>> LightGray
+}
+
+rectangle "Api Gateway" <<Microservice>> {
+}
+
+rectangle "Eureka Server" <<Microservice>> {
+}
+
+rectangle "SaveFile Service" <<Microservice>> {
+  database savefile
+}
+
+rectangle "GetFile Service" <<Microservice>> {
+  database getfile
+}
+
+rectangle "Verifier Service" <<Microservice>> {
+}
+
+rectangle "RabbitMQ" <<FanOut>> {
+}
+
+rectangle "Prometheus" <<Monitor>> {
+}
+
+rectangle "Grafana" <<Monitor>> {
+}
+
+
+queue savequeue
+queue getqueue
+
+[Api Gateway] <--> [Eureka Server] : Service Discovery
+[SaveFile Service] --> [Eureka Server] : Service Registration
+[GetFile Service] --> [Eureka Server] : Service Registration
+[Verifier Service] --> [Eureka Server] : Service Registration
+[Prometheus] <-- [Eureka Server] : Get Service Registration
+
+[SaveFile Service] --> [RabbitMQ] : Publish File Info
+[Verifier Service] --> [RabbitMQ] : Publish File Info
+
+[RabbitMQ] --> [savequeue]
+[RabbitMQ] --> [getqueue]
+
+[savequeue] --> [SaveFile Service]
+[getqueue] --> [GetFile Service]
+
+[Api Gateway] <--> [SaveFile Service] : /savefile/
+[Api Gateway] <--> [GetFile Service] : /getfile/
+
+[Prometheus] <-- [SaveFile Service] : Monitor
+[Prometheus] <-- [GetFile Service] : Monitor
+[Prometheus] <-- [Verifier Service] : Monitor
+[Grafana] <-- [Prometheus] : Display Metrics
+
+storage sharedStorage
+[sharedStorage] <-- [SaveFile Service] : Save File
+[sharedStorage] --> [GetFile Service] : Get File
+
+@enduml
