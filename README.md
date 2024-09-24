@@ -8,7 +8,10 @@ Este proyecto tiene como objetivo implementar una arquitectura de microservicios
 El sistema está diseñado para escalar fácilmente y permite la integración con **Prometheus** para monitoreo, junto con **Grafana** para la visualización de métricas.
 
 ---
+## Diagrama
+![image](./image/structure.png)
 
+---
 ## Estructura del Proyecto
 
 ```
